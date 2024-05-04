@@ -21,7 +21,7 @@ frame_cache = namedtuple("frame_cache", ["proposal", "image", "feature", "multi_
 class Res5FlowContextHeads(Res5TemporalROIBoxHeads):
     def __init__(self, cfg, input_shape):
         super().__init__(cfg, input_shape)
-        self.context_feature        = cfg.MODEL.CONTEXT_FEATURE
+        self.context_feature        = cfg.MODEL.CONTEXT_FEATURE   #初始化了一些额外的参数，如上下文特征、ROI大小、ROI相对位置等
         self.roi_size               = cfg.MODEL.ROI_BOX_HEAD.POOLER_RESOLUTION
         self.roi_rel_position       = cfg.MODEL.ROI_BOX_HEAD.ROI_REL_POSITION
         # spatial position encoding for RoI feature
@@ -29,12 +29,12 @@ class Res5FlowContextHeads(Res5TemporalROIBoxHeads):
         self.num_context_frames = cfg.MODEL.CONTEXT_FLOW_FRAMES
         self.step = cfg.MODEL.CONTEXT_STEP_LEN
         self.flownet_weights = cfg.MODEL.FLOWNET_WEIGHTS
-        self.relation = FlowContextLayers(cfg, self.d_model)
+        self.relation = FlowContextLayers(cfg, self.d_model)#创建了一个 FlowContextLayers 实例，用于在特征上执行上下文关系建模
         self.flownet = FlowNetS(cfg, flownet_method="DFF")
         self.init_flownet()
         self.context_image_buffer = deque(maxlen=self.num_context_frames)
-        self.context_feature_buffer = deque(maxlen=self.num_context_frames)
-        self.frame_idx = 0
+        self.context_feature_buffer = deque(maxlen=self.num_context_frames)#使用缓存队列存储上下文图像和特征，以便在处理多帧视频序列时使用。
+        self.frame_idx = 0 #设置了帧索引参数，用于跟踪当前处理的帧在视频序列中的位置。
     
     def init_flownet(self):
         ckpt = torch.load(self.flownet_weights, map_location=self.device)
