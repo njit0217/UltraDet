@@ -70,7 +70,7 @@ class Res5FlowContextHeads(Res5TemporalROIBoxHeads):
         img_ctxt_copies = context_images[:, None].repeat(1, num_local_frames, 1, 1, 1).flatten(0,1)
         concat_imgs_pair = torch.cat([img_cur_copies, img_ctxt_copies], dim=1)
         # flow: (T * B, 2, H, W)
-        flow, scale_map = self.flownet(concat_imgs_pair)
+        flow, scale_map = self.flownet(concat_imgs_pair) 计算当前帧图像和上下文帧图像之间的光流，得到光流张量 flow 和尺度映射张量 scale_map
         warped_context_features = []
         for context_feature in context_features:
             H, W = context_feature.shape[-2:]
@@ -80,7 +80,7 @@ class Res5FlowContextHeads(Res5TemporalROIBoxHeads):
             warped_context_feature = self.resample(context_feature, flow_i)
             feature = warped_context_feature * scale_map_i
             warped_context_features.append(feature)
-        return warped_context_features
+        return warped_context_features 所有上下文特征在当前帧空间中的映射结果
 
     def extract_multi_features(
         self, proposal_boxes, local_images, context_images, context_features, roi_position
